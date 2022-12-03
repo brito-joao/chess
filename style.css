@@ -1,0 +1,21 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+body{
+    background-color: black;
+    
+}
+.container{
+    width: 100vw;
+    
+    display: grid;
+    gap:0;
+    grid-template-columns: repeat(8,1fr);
+
+}
+.square{
+    width: 12.5vw;
+    height: clamp(1em,12.5vw,10em);
+    background-color: white;
+}
