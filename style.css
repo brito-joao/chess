@@ -19,3 +19,8 @@ body{
     height: clamp(1em,12.5vw,10em);
     background-color: white;
 }
+
+.pawn{
+    width: 12vw;
+    max-height: 12vw;
+}

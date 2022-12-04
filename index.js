@@ -3,41 +3,38 @@ const container=document.querySelector(".container");
 
 function gameBoard(){
     let counter=0;
+    let array=[1,0,1,0,1,0,1,0,1,1,0,1,0,1,0,1,0,1];
+    
     for(var i=1;i<=64;i++){
         
         const square=document.createElement("square");
-        square.className="square";
+        square.className=`square p${i}`;
 
-        if(counter<=8 && i!=0){
+        if(counter<15){
             counter+=1;
+            chessBoard(array[counter],square);  
         }else{
-            if ((counter-1)%2 && counter!=0){
-                counter=2;
-            }else{
-                counter=1;
-            }
-            
+            counter=0;
         }
-
-        console.log(counter);
-        chessBoard(i,counter,square);
-        
         container.appendChild(square);
     }
 }
 gameBoard();
 
 //to make criss cross
-function chessBoard(number,count,element){
-    
-    if((number%3) && (number%9)){
-        //element.style="background-color:green";
-        
-    }
-    
-    if(count%2){
+function chessBoard(number,element){
+    if(number==1){
         element.style="background-color:green";
-        
-    }
-    
+    }else{
+        element.style="background-color:white";
+    } 
 }
+
+//experiments with images 
+let piece_coordinate=11;
+square10=document.querySelector(`.p${piece_coordinate}`);
+//square10.style="background-color:red";
+const img=document.createElement("img");
+img.className="pawn";
+img.src="pawn.png";
+square10.appendChild(img)
