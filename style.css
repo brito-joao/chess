@@ -8,7 +8,7 @@ body{
 }
 .container{
     width: 100vw;
-    
+    margin-top: 20vh;
     display: grid;
     gap:0;
     grid-template-columns: repeat(8,1fr);
