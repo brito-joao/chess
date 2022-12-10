@@ -4,7 +4,7 @@ function Game(){
     this.board=[];
     this.pawns=[];
     this.pieces=[];
-    this.current_piece;
+    this.current_piece=undefined;
 }
 Game.prototype.chessBoard=function(number,element){
     if(number==1){
@@ -58,55 +58,53 @@ Game.prototype.eventListener=function(){
         square.addEventListener("click", ()=>{
             
             item_class=square.classList[1];
-            console.log(item_class);
-
-            game.pawns.forEach((pawn)=>{
-                
-                if(item_class[1]+item_class[2]==pawn.position){
-
-                    //try this instead of hasPiece function
-                    if(pawn.canMove==true){
-                        pawn.canMove;
-                    }
-    
-                    pawn.canMove=true;
+            
+            let clicked_square=item_class[1]+item_class[2];
+            
+            if(hasPiece(clicked_square)==true){
+                if(game.current_piece==undefined){
+                    game.current_piece=clicked_square;  
                 }else{
-                    
-                    if(pawn.canMove==true){
-                        //remove the last position img; 
-                        
-                        console.log(hasPiece(item_class[1]+item_class[2]));
-                        if(hasPiece(item_class[1]+item_class[2])==false){
-                            const pawn_div=document.querySelector(`.p${pawn.position}`);
-                            pawn_div.innerHTML="";
-                            pawn.position=item_class[1]+item_class[2];
-                            pawn.updatePosition(); 
-                        }
-                        
-                        pawn.canMove=false;  
-                        
-                          
+                    if(game.current_piece==clicked_square){
+                        console.log("this is your own piece");
+                    }else{
+                       console.log("cant go here, there is another piece here"); 
                     }
+                    
                 }
-            })
+                console.log("piece here");
+                
+            }else{
+                console.log("no piece here");
+            }
+            
         })
     });
 }
 //to make criss cross
-
+function bin(){
+    const pawn_div=document.querySelector(`.p${pawn.position}`);
+    pawn_div.innerHTML="";
+    pawn.position=item_class[1]+item_class[2];
+    pawn.updatePosition(); 
+}
 
 //experiments unorganized code 
 
 //useless function
 function hasPiece(square){
     let condition=false;
+    
     game.pawns.forEach((item)=>{
         if(item.position==square){
-            console.log(item.position)
+            
             condition=true;
+            
         }
+        
     })
     return condition;
+    
 }
 
 
