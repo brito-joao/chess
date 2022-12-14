@@ -1,10 +1,13 @@
 const container=document.querySelector(".container");
 
+
+//main game object 
 function Game(){
     this.board=[];
     
     this.pieces=[];
     this.current_piece=undefined;
+    this.current_piece_color=undefined;
 }
 Game.prototype.chessBoard=function(number,element){
     if(number==1){
@@ -44,7 +47,7 @@ game.gameBoard();
 
 
 
-//modify this 
+//most important function of the program
 Game.prototype.eventListener=function(){
 
 
@@ -57,30 +60,69 @@ Game.prototype.eventListener=function(){
     squares.forEach((square)=>{
 
 
+        //center of the game operations----- since the game doesn't have a main loop
         square.addEventListener("click", ()=>{
             
+            //find position of clicked piece
             item_class=square.classList[1];
-            
             let clicked_square=item_class[1]+item_class[2];
+            
             
             if(hasPiece(clicked_square)==true){
 
+                
                 if(game.current_piece==undefined){
+                    //change current piece to pressed piece
                     game.current_piece=clicked_square;  
+                    //update square color to yellow because is selected
+                    game.current_piece_color=change_square_color(game.current_piece);
+                    console.log(game.current_piece_color);
                 }else{
+                    //if clicked on currently selected piece-------
                     if(game.current_piece==clicked_square){
                         console.log("this is your own piece");
                     }else{
+                        //clicking on a piece that has the same color, but not selected------
                         if(game.pieces[piece_finder(clicked_square)].color==game.pieces[piece_finder(game.current_piece)].color){
                             console.log("cant go here, this piece is part of your team"); 
-                        }else{
-                            console.log(game.pieces);remove_piece(item_class);
-                            game.pieces.splice(piece_finder(clicked_square),1);
-                            console.log(clicked_square);
+
                             
-                            bin(item_class,game.current_piece);
-                            console.log("yummy, you can kill this piece");
-                            game.current_piece=undefined;
+                            //so that when the piece is changed the color of the square remains the same
+                            change_back_square_color(game.current_piece,game.current_piece_color);
+                            //update current square color to mach game.current_piece
+                            game.current_piece_color=find_square_color(clicked_square);
+                            game.current_piece=clicked_square;
+                            //change pressed square to yellow
+                            change_square_color(game.current_piece);
+                        }else{
+                            //if condition that finds the type of piece
+                            //later change this if and put it inside the pawn_can_kill function
+                            if(game.pieces[piece_finder(game.current_piece)].name=="pawn"){
+                                console.log("killed with a pawn!");
+                                if(pawn_can_kill(game.current_piece,clicked_square)==true){
+                                    console.log(game.pieces);remove_piece(item_class);
+                                    game.pieces.splice(piece_finder(clicked_square),1);
+                                    console.log(clicked_square);
+                                    
+                                    change_back_square_color(game.current_piece,game.current_piece_color)
+        
+                                    bin(item_class,game.current_piece);
+                                    console.log("yummy, you can kill this piece");
+                                    game.current_piece=undefined;
+                                }
+                            }else{
+                                //other pieces , remove this else later 
+                                console.log(game.pieces);remove_piece(item_class);
+                                game.pieces.splice(piece_finder(clicked_square),1);
+                                console.log(clicked_square);
+                                
+                                change_back_square_color(game.current_piece,game.current_piece_color)
+
+                                bin(item_class,game.current_piece);
+                                console.log("yummy, you can kill this piece");
+                                game.current_piece=undefined;
+                            }
+                            
                         }
                        
                     }
@@ -93,7 +135,7 @@ Game.prototype.eventListener=function(){
                 //if piece is already selected and current click is on empty space
                 if(game.current_piece!=undefined){
                     console.log("moving to this place!"); 
-                    
+                    change_back_square_color(game.current_piece,game.current_piece_color)
                     bin(item_class,game.current_piece);
                     game.current_piece=undefined;
                 }
@@ -102,6 +144,50 @@ Game.prototype.eventListener=function(){
             
         })
     });
+};
+
+
+//change color of selected square
+function find_square_color(square_number){
+    const square=document.querySelector(`.p${square_number}`);
+    let original_color=square.style.backgroundColor;
+    return original_color;
+}
+function change_square_color(selected_piece_class){
+    const square=document.querySelector(`.p${selected_piece_class}`);
+    let original_color=square.style.backgroundColor;
+    
+    square.style="background-color:yellow";
+    return original_color;
+}
+function change_back_square_color(selected_piece_class,original_color){
+    const square=document.querySelector(`.p${selected_piece_class}`);
+    square.style=`background-color:${original_color}` ;
+}
+//validate pawn killing
+function pawn_can_kill(pawn_position,victim_piece){
+    let difference;
+    let can_kill=false;
+    //find pawn color, then compare, if 9 or 7 squares away, then can eat
+    let pawn_color=game.pieces[piece_finder(pawn_position)].color;
+    console.log(pawn_color);
+    if(pawn_color.piece!=game.pieces[piece_finder(victim_piece)].color){
+
+        //white
+
+        //use absolute values to later change this part to 1 condition black & white
+
+        //this doesn't work long term, as the pawn can eat backwards
+        difference=pawn_position-victim_piece;
+        
+        if(Math.abs(difference)==9 || Math.abs(difference)==7){
+            can_kill=true;
+        }
+        
+        
+    }
+    return can_kill;
+
 }
 //turn occupied piece into an empty space
 function remove_piece(item_class){
