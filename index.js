@@ -134,10 +134,21 @@ Game.prototype.eventListener=function(){
 
                 //if piece is already selected and current click is on empty space
                 if(game.current_piece!=undefined){
-                    console.log("moving to this place!"); 
-                    change_back_square_color(game.current_piece,game.current_piece_color)
-                    bin(item_class,game.current_piece);
-                    game.current_piece=undefined;
+
+                    //bishop moves 
+                    
+                    if(bishop_can_move(game.current_piece,clicked_square)==true){
+                        change_back_square_color(game.current_piece,game.current_piece_color)
+                        bin(item_class,game.current_piece);
+                        game.current_piece=undefined;
+                    }
+                    if(pawn_can_move(game.current_piece,clicked_square,game.current_piece_color)==true){
+                        console.log("moving to this place! BB"); 
+                        change_back_square_color(game.current_piece,game.current_piece_color)
+                        bin(item_class,game.current_piece);
+                        game.current_piece=undefined;
+                    }
+                    
                 }
                 console.log("no piece here");
             }
@@ -188,6 +199,68 @@ function pawn_can_kill(pawn_position,victim_piece){
     }
     return can_kill;
 
+}
+//validate the movement of pieces
+
+function pawn_can_move(pawn_position,wanted_position,original_color){
+    let difference;
+    let is_first_move=false;
+    let is_pawn=false;
+    let can_move=false;
+    let original_position_color="white";
+    if(game.pieces[piece_finder(pawn_position)].name==="pawn"){
+        is_pawn=true;
+    }
+
+    if(game.pieces[piece_finder(pawn_position)].moved==false){
+        
+        is_first_move=true;
+        game.pieces[piece_finder(pawn_position)].moved=true;
+    }
+    
+    console.log(is_first_move, "istf")
+
+    //tomorrow: create a function for the difference for all the positions
+    difference=Math.abs(pawn_position-wanted_position);
+    
+    if((difference==8 && find_square_color(wanted_position)!=original_color && is_first_move==false) || (is_first_move=true && difference==16)){
+        console.log(find_square_color(wanted_position)!=original_color, "unique ident for bug fix");
+        can_move=true;
+        
+    }
+    
+
+    if(is_pawn==true && can_move==true){
+        return true;
+    }else{
+        return false;
+    }
+}
+function bishop_can_move(bishop_position,wanted_position){
+    let difference;
+    let can_move=false;
+    let color_same=false;
+    let is_bishop=false;
+    //this method of % doesn't completly work, so I'll use the colors of the squares to compare also
+    if(game.pieces[piece_finder(bishop_position)].name==="bishop"){
+        is_bishop=true;
+    }
+    
+    if(find_square_color(bishop_position)==find_square_color(wanted_position)){
+        color_same=true;
+    }
+
+    difference=Math.abs(bishop_position-wanted_position);
+    if(difference>=7 && (difference%9==0 || difference%7==0) ){
+        console.log("difference is:", difference, difference%9, difference%7);
+        can_move=true;
+    }
+    if(color_same==true && color_same==true && is_bishop==true){
+        return true;
+    }else{
+        return false;
+    }
+    
 }
 //turn occupied piece into an empty space
 function remove_piece(item_class){
@@ -253,6 +326,7 @@ function Pawn(position){
     this.position=position;
     this.canMove=false;
     this.color="black";
+    this.moved=false;
 }
 
 Pawn.prototype.updatePosition=function (){
