@@ -9,6 +9,7 @@ function Game(){
     this.current_piece_color=undefined;
 }
 Game.prototype.chessBoard=function(number,element){
+    
     number==1 ? element.style="background-color:green" : element.style="background-color:white";
     
 }
@@ -19,20 +20,10 @@ Game.prototype.gameBoard=function(){
     for(var i=1;i<=64;i++){
         
         const square=document.createElement("square");
-        if(i>9){
-            square.className=`square p${i}`;
-            game.board.push(`.p${i}`);
-        }else{
-            square.className=`square p0${i}`;
-            game.board.push(`.p0${i}`);
-        }
         
-        if(counter<15){
-            counter+=1;
-            game.chessBoard(array[counter],square);  
-        }else{
-            counter=0;
-        }
+        (i>9)?( square.className=`square p${i}`,game.board.push(`.p${i}`) ):( square.className=`square p0${i}`,game.board.push(`.p0${i}`) );
+        (counter<15)?( counter+=1,game.chessBoard(array[counter],square) ):( counter=0,game.chessBoard(array[counter+1],square) );
+
         container.appendChild(square);
         
         
@@ -74,10 +65,7 @@ function mainFunction(square){
             if(game.current_piece!=undefined){
 
                 //piece move validation
-                
-                bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
-                :pawn_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
-                :console.log("this is where the other piece come in");
+                piece_movement_validation(game,clicked_square,item_class);
             }
             console.log("no piece here");
     }
@@ -91,56 +79,78 @@ function move_piece_to_empty_square(item_class,game){
     game.current_piece=undefined;
 }
 
+function piece_movement_validation(game,clicked_square,item_class){
+    console.log("bisgop:",bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true)
+    bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
+    :pawn_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
+    :knight_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game):{};
 
+}
 
 function first_square_clicked(clicked_square){game.current_piece=clicked_square;game.current_piece_color=change_square_color(game.current_piece);console.log(game.current_piece_color)}
 
-function clicked_occupied_a_place(clicked_square,item_class){
-    if(game.pieces[piece_finder(clicked_square)].color==game.pieces[piece_finder(game.current_piece)].color){
-        console.log("cant go here, this piece is part of your team"); 
+function clicked_occupied_place(clicked_square,item_class){
 
-        
-        //so that when the piece is changed the color of the square remains the same
-        change_back_square_color(game.current_piece,game.current_piece_color);
-        //update current square color to mach game.current_piece
-        game.current_piece_color=find_square_color(clicked_square);
-        game.current_piece=clicked_square;
-        //change pressed square to yellow
-        change_square_color(game.current_piece);
-    }else{
-        //if condition that finds the type of piece
-        //later change this if and put it inside the pawn_can_kill function
-        if(game.pieces[piece_finder(game.current_piece)].name=="pawn"){
-            console.log("killed with a pawn!");
-            if(pawn_can_kill(game.current_piece,clicked_square)==true){
-                console.log(game.pieces);
+
+    //if the piece clicked has the same color of the current piece
+    switch(game.pieces[piece_finder(clicked_square)].color==game.pieces[piece_finder(game.current_piece)].color){
+        case true:
+            change_current_selected_piece(game,clicked_square)
+        case false:
+                //if condition that finds the type of piece
+                //later change this if and put it inside the pawn_can_kill function
+            if(game.pieces[piece_finder(game.current_piece)].name=="pawn"){
+                console.log("killed with a pawn!");
+                if(pawn_can_kill(game.current_piece,clicked_square)==true){
+                    console.log(game.pieces);
+                    remove_piece(item_class);
+                    game.pieces.splice(piece_finder(clicked_square),1);
+                    console.log(clicked_square);
+                    
+                    change_back_square_color(game.current_piece,game.current_piece_color)
+
+                    bin(item_class,game.current_piece);
+                    console.log("yummy, you can kill this piece");
+                    game.current_piece=undefined;
+                }
+            }
+            if(bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true){
                 remove_piece(item_class);
                 game.pieces.splice(piece_finder(clicked_square),1);
-                console.log(clicked_square);
-                
-                change_back_square_color(game.current_piece,game.current_piece_color)
 
+                change_back_square_color(game.current_piece,game.current_piece_color)
                 bin(item_class,game.current_piece);
-                console.log("yummy, you can kill this piece");
                 game.current_piece=undefined;
             }
-        }
-        if(bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true){
-            remove_piece(item_class);
-            game.pieces.splice(piece_finder(clicked_square),1);
+            if(knight_can_move(game.current_piece,clicked_square,game.current_piece_color)==true){
+                remove_piece(item_class);
+                game.pieces.splice(piece_finder(clicked_square),1);
 
-            change_back_square_color(game.current_piece,game.current_piece_color)
-            bin(item_class,game.current_piece);
-            game.current_piece=undefined;
-        }
+                change_back_square_color(game.current_piece,game.current_piece_color)
+                bin(item_class,game.current_piece);
+                game.current_piece=undefined;
+            }
         
     }
 
     
 }
+function change_current_selected_piece(game,clicked_square){
+    console.log("cant go here, this piece is part of your team"); 
+
+    //so that when the piece is changed the color of the square remains the same
+    change_back_square_color(game.current_piece,game.current_piece_color);
+    //update current square color to mach game.current_piece
+    game.current_piece_color=find_square_color(clicked_square);
+    game.current_piece=clicked_square;
+    //change pressed square to yellow
+    change_square_color(game.current_piece);
+}
+
 function find_square_color(square_number){
     const square=document.querySelector(`.p${square_number}`);
     let original_color=square.style.backgroundColor;
+    console.log(original_color, "original color");
     return original_color;
 }
 function change_square_color(selected_piece_class){
@@ -222,14 +232,30 @@ function bishop_can_move(bishop_position,wanted_position,original_color){
     let is_bishop=false;
     difference=Math.abs(bishop_position-wanted_position);
     //this method of % doesn't completly work, so I'll use the colors of the squares to compare also
-    game.pieces[piece_finder(bishop_position)].name==="bishop" ? is_bishop=true
-    :original_color==find_square_color(wanted_position)? color_same=true
-    :difference>=7 && (difference%9==0 || difference%7==0)?can_move=true:{};
+    game.pieces[piece_finder(bishop_position)].name==="bishop" ? is_bishop=true:{};
+    original_color==find_square_color(wanted_position)? color_same=true:{};
+    difference>=7 && (difference%9==0 || difference%7==0)?can_move=true:{};
     
+    console.log("bishop conditions:", wanted_position,find_square_color(wanted_position),color_same,can_move);
     return color_same==true && can_move==true && is_bishop==true ? true : false;
     
     
 }
+
+function knight_can_move(knight_position,wanted_position,original_color){
+    let knight_movement={"can_move":false,"color_same":false,"is_knight":false,"difference":0};
+    knight_movement["difference"]=Math.abs(knight_position-wanted_position);
+    console.log(knight_movement["can_move"]);
+
+    game.pieces[piece_finder(knight_position)].name==="horse" ? knight_movement["is_knight"]=true:{};
+    original_color!=find_square_color(wanted_position)? knight_movement["color_same"]=true:{};
+    
+    (knight_movement["difference"]%17==0 || knight_movement["difference"]%15==0 || knight_movement["difference"]%10==0 || knight_movement["difference"]%6==0)? knight_movement["can_move"]=true:{};
+    
+    //console.log("knight conditions:", wanted_position,find_square_color(wanted_position),color_same,can_move);
+    return knight_movement["color_same"]==true && knight_movement["can_move"]==true && knight_movement["is_knight"]==true ? true : false;
+}
+
 //turn occupied piece into an empty space
 function remove_piece(item_class){
     console.log(item_class);
