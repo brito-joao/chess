@@ -67,7 +67,7 @@ function mainFunction(square){
                 //piece move validation
                 piece_movement_validation(game,clicked_square,item_class);
             }
-            console.log("no piece here");
+            
     }
 }
 
@@ -83,7 +83,9 @@ function piece_movement_validation(game,clicked_square,item_class){
     console.log("bisgop:",bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true)
     bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
     :pawn_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
-    :knight_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game):{};
+    :knight_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
+    :rook_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
+    :{};
 
 }
 
@@ -96,44 +98,32 @@ function clicked_occupied_place(clicked_square,item_class){
     switch(game.pieces[piece_finder(clicked_square)].color==game.pieces[piece_finder(game.current_piece)].color){
         case true:
             change_current_selected_piece(game,clicked_square)
+            break;
         case false:
                 //if condition that finds the type of piece
                 //later change this if and put it inside the pawn_can_kill function
-            if(game.pieces[piece_finder(game.current_piece)].name=="pawn"){
-                console.log("killed with a pawn!");
-                if(pawn_can_kill(game.current_piece,clicked_square)==true){
-                    console.log(game.pieces);
-                    remove_piece(item_class);
-                    game.pieces.splice(piece_finder(clicked_square),1);
-                    console.log(clicked_square);
-                    
-                    change_back_square_color(game.current_piece,game.current_piece_color)
-
-                    bin(item_class,game.current_piece);
-                    console.log("yummy, you can kill this piece");
-                    game.current_piece=undefined;
-                }
-            }
-            if(bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true){
-                remove_piece(item_class);
-                game.pieces.splice(piece_finder(clicked_square),1);
-
-                change_back_square_color(game.current_piece,game.current_piece_color)
-                bin(item_class,game.current_piece);
-                game.current_piece=undefined;
-            }
-            if(knight_can_move(game.current_piece,clicked_square,game.current_piece_color)==true){
-                remove_piece(item_class);
-                game.pieces.splice(piece_finder(clicked_square),1);
-
-                change_back_square_color(game.current_piece,game.current_piece_color)
-                bin(item_class,game.current_piece);
-                game.current_piece=undefined;
-            }
+            
+                
+            (pawn_can_kill(game.current_piece,clicked_square,game)==true) ? piece_killing_validation(game,clicked_square,item_class)
+                :(bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true) ? piece_killing_validation(game,clicked_square,item_class)
+                :(knight_can_move(game.current_piece,clicked_square,game.current_piece_color)==true) ? piece_killing_validation(game,clicked_square,item_class)
+                :(rook_can_move(game.current_piece,clicked_square,game.current_piece_color)==true) ? piece_killing_validation(game,clicked_square,item_class)
+                :{};
+            break;
+            
         
     }
 
     
+}
+
+function piece_killing_validation(game,clicked_square,item_class){
+    remove_piece(item_class);
+    game.pieces.splice(piece_finder(clicked_square),1);
+
+    change_back_square_color(game.current_piece,game.current_piece_color)
+    bin(item_class,game.current_piece);
+    game.current_piece=undefined;
 }
 function change_current_selected_piece(game,clicked_square){
     console.log("cant go here, this piece is part of your team"); 
@@ -165,28 +155,23 @@ function change_back_square_color(selected_piece_class,original_color){
     square.style=`background-color:${original_color}` ;
 }
 //validate pawn killing
-function pawn_can_kill(pawn_position,victim_piece){
+function pawn_can_kill(pawn_position,victim_piece,game){
     let difference;
     let can_kill=false;
-    //find pawn color, then compare, if 9 or 7 squares away, then can eat
+    let is_pawn=false;
+    let color_same=false;
     let pawn_color=game.pieces[piece_finder(pawn_position)].color;
-    console.log(pawn_color);
-    if(pawn_color.piece!=game.pieces[piece_finder(victim_piece)].color){
+    difference=pawn_position-victim_piece;
+    //find pawn color, then compare, if 9 or 7 squares away, then can eat
 
-        //white
-
-        //use absolute values to later change this part to 1 condition black & white
-
-        //this doesn't work long term, as the pawn can eat backwards
-        difference=pawn_position-victim_piece;
-        
-        if(Math.abs(difference)==9 || Math.abs(difference)==7){
-            can_kill=true;
-        }
+    game.pieces[piece_finder(pawn_position)].name==="pawn" ? is_pawn=true:{};
+    (pawn_color!=game.pieces[piece_finder(victim_piece)].color) ? color_same=true:{};
+    (Math.abs(difference)==9 || Math.abs(difference)==7)? can_kill=true:{};
         
         
-    }
-    return can_kill;
+        
+    
+    return is_pawn==true && can_kill==true && color_same==true? true : false;
 
 }
 //validate the movement of pieces
@@ -202,6 +187,7 @@ function pawn_can_move(pawn_position,wanted_position,original_color){
     game.pieces[piece_finder(pawn_position)].name==="pawn"?is_pawn=true:{};
     //if it is the pawn's first move --------
     //change the var is_first_move to true and pawn atribute is_first_move to false
+    
     if(game.pieces[piece_finder(pawn_position)].is_first_move==true){is_first_move=true;game.pieces[piece_finder(pawn_position)].is_first_move=false;}
     
     
@@ -250,12 +236,17 @@ function knight_can_move(knight_position,wanted_position,original_color){
     game.pieces[piece_finder(knight_position)].name==="horse" ? knight_movement["is_knight"]=true:{};
     original_color!=find_square_color(wanted_position)? knight_movement["color_same"]=true:{};
     
-    (knight_movement["difference"]%17==0 || knight_movement["difference"]%15==0 || knight_movement["difference"]%10==0 || knight_movement["difference"]%6==0)? knight_movement["can_move"]=true:{};
+    (knight_movement["difference"]==17 || knight_movement["difference"]==15 || knight_movement["difference"]==10 || knight_movement["difference"]==6)? knight_movement["can_move"]=true:{};
     
-    //console.log("knight conditions:", wanted_position,find_square_color(wanted_position),color_same,can_move);
-    return knight_movement["color_same"]==true && knight_movement["can_move"]==true && knight_movement["is_knight"]==true ? true : false;
+    console.log("hahahahah",knight_movement["difference"]);
+    return (knight_movement["color_same"]==true && knight_movement["can_move"]==true && knight_movement["is_knight"]==true) ? true : false;
 }
-
+function rook_can_move(rook_position,wanted_position,original_color){
+    let rook_movement={"can_move":false,"color_same":false,"is_rook":false,"difference":0};
+    rook_movement["difference"]=Math.abs(rook_position-wanted_position);
+    (rook_movement["difference"]==8 || rook_movement["difference"]==16 || rook_movement["difference"]==24 || rook_movement["difference"]==32 || rook_movement["difference"]==40 || rook_movement["difference"]==48 || rook_movement["difference"]==56 )? rook_movement["can_move"]=true:{};
+    return rook_movement["can_move"]==true ? true : false;
+}
 //turn occupied piece into an empty space
 function remove_piece(item_class){
     console.log(item_class);
@@ -275,7 +266,7 @@ function bin(item_class,selected_piece_class){
 //experiments unorganized code 
 
 function piece_finder(item_class){
-    let item_index=0;game.pieces.forEach((item,index)=>{item.position==item_class?item_index=index:console.log("nothing");});
+    let item_index=0;game.pieces.forEach((item,index)=>{item.position==item_class?item_index=index:{};});
     return item_index;
 }
 function hasPiece(square){
@@ -292,7 +283,6 @@ function King(position){
 
 King.prototype.updatePosition=function(){
     let current_index=piece_finder(this.position);
-    console.log(game.pieces[current_index]);
     updatePosition(game.pieces[current_index]);
 }
 function Pawn(position){
@@ -305,7 +295,6 @@ function Pawn(position){
 
 Pawn.prototype.updatePosition=function (){
     let current_index=piece_finder(this.position);
-    console.log(game.pieces[current_index]);
     updatePosition(game.pieces[current_index]);
     
 }
@@ -318,7 +307,6 @@ function Tower(position){
 
 Tower.prototype.updatePosition=function(){
     let current_index=piece_finder(this.position);
-    console.log(game.pieces[current_index]);
     updatePosition(game.pieces[current_index]);
 }
 
@@ -330,7 +318,6 @@ function Horse(position){
 
 Horse.prototype.updatePosition=function(){
     let current_index=piece_finder(this.position);
-    console.log(game.pieces[current_index]);
     updatePosition(game.pieces[current_index]);
 }
 
@@ -342,7 +329,6 @@ function Bishop(position){
 
 Bishop.prototype.updatePosition=function(){
     let current_index=piece_finder(this.position);
-    console.log(game.pieces[current_index]);
     updatePosition(game.pieces[current_index]);
 }
 
@@ -354,20 +340,17 @@ function Queen(position){
 
 Queen.prototype.updatePosition=function(){
     let current_index=piece_finder(this.position);
-    console.log(game.pieces[current_index]);
     updatePosition(game.pieces[current_index]);
 }
 
 //template for all updateposition functions
 function updatePosition(object){
     object.piece=document.querySelector(`${game.board[object.position-1]}`);
-    
     object.img=document.createElement("img");
     object.img.className="pawn";
-    
     object.img.src=`${object.name}_${object.color}.png`;
     object.piece.appendChild(object.img);
-    console.log(object.img);
+    
 }
 
 function piece_spawner(object,array_positions_black,array_positions_white){
@@ -390,5 +373,4 @@ piece_spawner(Tower,[1,8],[57,64]);
 piece_spawner(Horse,[2,7],[58,63]);
 piece_spawner(Bishop,[3,6],[59,62]);
 piece_spawner(Queen,[4],[61]);
-
 console.log("hello world");
