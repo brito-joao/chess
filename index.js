@@ -7,6 +7,9 @@ function Game(){
     this.pieces=[];
     this.current_piece=undefined;
     this.current_piece_color=undefined;
+    this.row_board=[
+        [],[],[],[],[],[],[],[]
+    ];
 }
 Game.prototype.chessBoard=function(number,element){
     
@@ -29,9 +32,20 @@ Game.prototype.gameBoard=function(){
         
     }
 };
+
+Game.prototype.position_board_creator=function(){
+    let row=0;
+    let row_start=[9,17,25,33,41,49,57];
+    for(var i=1;i<=64;i++){
+        row_start.includes(i) ? row++:{};
+        game.row_board[row].push(i)
+    }
+    console.log(game.row_board);
+}
+
 let game=new Game();
 game.gameBoard();
-
+game.position_board_creator();
 //most important function of the program
 Game.prototype.eventListener=function(){
     const squares=document.querySelectorAll(".square");
@@ -243,11 +257,35 @@ function knight_can_move(knight_position,wanted_position,original_color){
 }
 function rook_can_move(rook_position,wanted_position,original_color){
     let rook_movement={"can_move":false,"color_same":false,"is_rook":false,"difference":0};
-    rook_movement["difference"]=Math.abs(rook_position-wanted_position);
-    (rook_movement["difference"]==8 || rook_movement["difference"]==16 || rook_movement["difference"]==24 || rook_movement["difference"]==32 || rook_movement["difference"]==40 || rook_movement["difference"]==48 || rook_movement["difference"]==56 )? rook_movement["can_move"]=true:{};
-    return rook_movement["can_move"]==true ? true : false;
+    game.pieces[piece_finder(rook_position)].name==="tower" ? rook_movement["is_rook"]=true:{};
+    
+    return (same_column(rook_position,wanted_position) || same_row(rook_position,wanted_position)==true) && rook_movement["is_rook"]==true  ? true : false;
 }
 //turn occupied piece into an empty space
+function same_row(number1, number2){
+    let is_same_row=false;
+    game.row_board.forEach((row)=>{
+        console.log(row.includes(parseInt(number1)),"hahah",row,number1);
+        row.includes(parseInt(number1))==true && row.includes(parseInt(number2))==true ? is_same_row=true:{};
+    })
+    return is_same_row;
+}
+function same_column(number1,number2){
+    
+    let number1_index=0;
+    let number2_index=0;
+    game.row_board.forEach((row)=>{
+        //write the index of the number 1 & number2
+        if(row.includes(number1)){
+            number1_index=row.findIndex(number1);
+        }
+        if(row.includes(number2)){
+            number2_index=row.findIndex(number2);
+        }
+        
+    });
+    return number1_index==number2_index ? true:false;
+}
 function remove_piece(item_class){
     console.log(item_class);
     const piece_div=document.querySelector(`.${item_class}`);
