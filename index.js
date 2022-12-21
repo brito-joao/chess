@@ -236,8 +236,9 @@ function bishop_can_move(bishop_position,wanted_position,original_color){
     original_color==find_square_color(wanted_position)? color_same=true:{};
     difference>=7 && (difference%9==0 || difference%7==0)?can_move=true:{};
     
-    console.log("bishop conditions:", wanted_position,find_square_color(wanted_position),color_same,can_move);
-    return color_same==true && can_move==true && is_bishop==true ? true : false;
+    
+    
+    return color_same==true && can_move==true && is_bishop==true && bishop_piece_validation(bishop_position,wanted_position,difference,original_color) ? true : false;
     
     
 }
@@ -285,6 +286,86 @@ function same_column(number1,number2){
         
     });
     return number1_index==number2_index ? true:false;
+}
+function bishop_piece_validation(number1,number2,difference,original_color){
+    //let difference=number1-number2;
+    let divisible_by=difference%9==0 ? 9:7;
+    let is_negative=parseInt(number1)-parseInt(number2)<0 ? true:false;
+    console.log(is_negative,"dfghjklkjhgfdsssssssssss");
+    number1=parseInt(number1);
+    number2=parseInt(number2);
+    let differences_array_9=[];
+    let differences_array_7=[];
+    let can_move=true;
+    if(divisible_by==9){
+        differences_array_9=findNumbersDivisibleBy(difference,9);
+    }
+    if(divisible_by==7){
+        differences_array_7=findNumbersDivisibleBy(difference,7);
+        
+    }
+    
+    if(differences_array_9.length>=1){
+        differences_array_9.forEach((number_difference)=>{
+            console.log(number_difference,"jlkjljlk");
+            
+            if(is_negative==true){
+                if(original_color==find_square_color(number1+number_difference)){
+                    console.log(number1+number_difference,"addition");
+                    if(hasPiece(number1+number_difference)){
+                        can_move=false;
+                    }
+                }
+                
+            }else{
+                if(original_color==find_square_color(number1-number_difference)){
+                    if(hasPiece(number1-number_difference)){
+                        can_move=false;
+                    }
+                }
+                
+            }
+                
+            
+        })
+    }
+    
+    console.log(differences_array_7,differences_array_9);
+    if(differences_array_7.length>=1){
+        differences_array_7.forEach((number_difference)=>{
+            console.log(number_difference,"jlkjljlk");
+            if(is_negative==true){
+                if(original_color==find_square_color(number1+number_difference)){
+                    console.log(number1+number_difference,"addition");
+                    if(hasPiece(number1+number_difference)){
+                        can_move=false;
+                    }
+                }
+                
+            }else{
+                if(original_color==find_square_color(number1-number_difference)){
+                    if(hasPiece(number1-number_difference)){
+                        can_move=false;
+                    }
+                }
+                
+            }
+            
+        })
+    }
+    console.log(can_move,"has to give false");
+    return can_move;
+    
+}
+function findNumbersDivisibleBy(n,divisible) {
+    let array=[];
+    for (let i = 1; i < n; i++) {
+        if (i % divisible === 0) {
+            array.push(i);
+        }
+    }
+    
+    return array;
 }
 function remove_piece(item_class){
     console.log(item_class);
