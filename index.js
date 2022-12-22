@@ -1,12 +1,12 @@
 const container=document.querySelector(".container");
-
+const body=document.querySelector("body");
 
 //main game object 
 function Game(){
     this.board=[];
     this.pieces=[];
-    this.current_piece=undefined;
-    this.current_piece_color=undefined;
+    this.current_piece=10;
+    this.current_piece_color="white";
     this.row_board=[
         [],[],[],[],[],[],[],[]
     ];
@@ -54,11 +54,23 @@ Game.prototype.eventListener=function(){
         square.addEventListener("click", ()=>{
 
             mainFunction(square);
-            
+            game_over(game);
         })
     });
 };
-
+function game_over(game){
+    let counter=0;
+    game.pieces.forEach((piece)=>{
+        if(piece.name=="king"){
+            counter++;
+        }
+    })
+    console.log("is game over?",counter);
+    if(counter<2){
+        body.innerHTML+="<p class='gameo'>Game Over<p>";
+        body.style="background-color:white";
+    }
+}
 function mainFunction(square){
     //find position of clicked piece
     let item_class;
@@ -87,23 +99,25 @@ function mainFunction(square){
 
 //change color of selected square
 function move_piece_to_empty_square(item_class,game){
-    console.log("moving to this place! BB"); 
+    
     change_back_square_color(game.current_piece,game.current_piece_color)
     bin(item_class,game.current_piece);
     game.current_piece=undefined;
 }
 
 function piece_movement_validation(game,clicked_square,item_class){
-    console.log("bisgop:",bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true)
+    
     bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
     :pawn_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
     :knight_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
     :rook_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
+    :queen_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
+    :king_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
     :{};
 
 }
 
-function first_square_clicked(clicked_square){game.current_piece=clicked_square;game.current_piece_color=change_square_color(game.current_piece);console.log(game.current_piece_color)}
+function first_square_clicked(clicked_square){game.current_piece=clicked_square;game.current_piece_color=change_square_color(game.current_piece);}
 
 function clicked_occupied_place(clicked_square,item_class){
 
@@ -122,12 +136,14 @@ function clicked_occupied_place(clicked_square,item_class){
                 :(bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true) ? piece_killing_validation(game,clicked_square,item_class)
                 :(knight_can_move(game.current_piece,clicked_square,game.current_piece_color)==true) ? piece_killing_validation(game,clicked_square,item_class)
                 :(rook_can_move(game.current_piece,clicked_square,game.current_piece_color)==true) ? piece_killing_validation(game,clicked_square,item_class)
+                :(queen_can_move(game.current_piece,clicked_square,game.current_piece_color)==true) ? piece_killing_validation(game,clicked_square,item_class)
+                :(king_can_move(game.current_piece,clicked_square,game.current_piece_color)==true) ? piece_killing_validation(game,clicked_square,item_class)
                 :{};
             break;
             
         
     }
-
+    
     
 }
 
@@ -140,7 +156,7 @@ function piece_killing_validation(game,clicked_square,item_class){
     game.current_piece=undefined;
 }
 function change_current_selected_piece(game,clicked_square){
-    console.log("cant go here, this piece is part of your team"); 
+     
 
     //so that when the piece is changed the color of the square remains the same
     change_back_square_color(game.current_piece,game.current_piece_color);
@@ -154,7 +170,7 @@ function change_current_selected_piece(game,clicked_square){
 function find_square_color(square_number){
     const square=document.querySelector(`.p${square_number}`);
     let original_color=square.style.backgroundColor;
-    console.log(original_color, "original color");
+    
     return original_color;
 }
 function change_square_color(selected_piece_class){
@@ -210,19 +226,18 @@ function pawn_can_move(pawn_position,wanted_position,original_color){
     difference=Math.abs(pawn_position-wanted_position);
     
     if((difference==8 && find_square_color(wanted_position)!=original_color && is_first_move==false)){
-        console.log("A worked");
+        
         can_move=true;
         
     }
 
-    console.log(is_first_move, "istf")
+    
     if((is_first_move==true && difference==16) || (is_first_move==true && difference==8)){
-        console.log(is_first_move, "the first move");
+        
         can_move=true;
-        console.log("B worked");
+        
     }
-    console.log("pawn movement:",is_pawn, can_move,is_first_move,game.pieces[piece_finder(pawn_position)].is_first_move)
-
+    
     return is_pawn==true && can_move==true ? true:false;
 }
 function bishop_can_move(bishop_position,wanted_position,original_color){
@@ -232,7 +247,7 @@ function bishop_can_move(bishop_position,wanted_position,original_color){
     let is_bishop=false;
     difference=Math.abs(bishop_position-wanted_position);
     //this method of % doesn't completly work, so I'll use the colors of the squares to compare also
-    game.pieces[piece_finder(bishop_position)].name==="bishop" ? is_bishop=true:{};
+    game.pieces[piece_finder(bishop_position)].name==="bishop"? is_bishop=true:{};
     original_color==find_square_color(wanted_position)? color_same=true:{};
     difference>=7 && (difference%9==0 || difference%7==0)?can_move=true:{};
     
@@ -243,55 +258,76 @@ function bishop_can_move(bishop_position,wanted_position,original_color){
     
 }
 
+
 function knight_can_move(knight_position,wanted_position,original_color){
     let knight_movement={"can_move":false,"color_same":false,"is_knight":false,"difference":0};
     knight_movement["difference"]=Math.abs(knight_position-wanted_position);
-    console.log(knight_movement["can_move"]);
+    
 
     game.pieces[piece_finder(knight_position)].name==="horse" ? knight_movement["is_knight"]=true:{};
     original_color!=find_square_color(wanted_position)? knight_movement["color_same"]=true:{};
     
     (knight_movement["difference"]==17 || knight_movement["difference"]==15 || knight_movement["difference"]==10 || knight_movement["difference"]==6)? knight_movement["can_move"]=true:{};
     
-    console.log("hahahahah",knight_movement["difference"]);
+    
     return (knight_movement["color_same"]==true && knight_movement["can_move"]==true && knight_movement["is_knight"]==true) ? true : false;
 }
 function rook_can_move(rook_position,wanted_position,original_color){
     let rook_movement={"can_move":false,"color_same":false,"is_rook":false,"difference":0};
     game.pieces[piece_finder(rook_position)].name==="tower" ? rook_movement["is_rook"]=true:{};
     
-    return (same_column(rook_position,wanted_position) || same_row(rook_position,wanted_position)==true) && rook_movement["is_rook"]==true  ? true : false;
+    return (same_column(rook_position,wanted_position)==true || same_row(rook_position,wanted_position)==true) && rook_movement["is_rook"]==true && rook_piece_validation(rook_position,wanted_position)==true ? true : false;
 }
 //turn occupied piece into an empty space
 function same_row(number1, number2){
+    
     let is_same_row=false;
+    
     game.row_board.forEach((row)=>{
-        console.log(row.includes(parseInt(number1)),"hahah",row,number1);
+        
+        
         row.includes(parseInt(number1))==true && row.includes(parseInt(number2))==true ? is_same_row=true:{};
     })
     return is_same_row;
 }
 function same_column(number1,number2){
     
+    
     let number1_index=0;
     let number2_index=0;
     game.row_board.forEach((row)=>{
         //write the index of the number 1 & number2
-        if(row.includes(number1)){
-            number1_index=row.findIndex(number1);
+        if(row.includes(parseInt(number1))){
+            number1_index=row.indexOf(parseInt(number1));
         }
-        if(row.includes(number2)){
-            number2_index=row.findIndex(number2);
+        if(row.includes(parseInt(number2))){
+            number2_index=row.indexOf(parseInt(number2));
         }
         
     });
     return number1_index==number2_index ? true:false;
 }
+function queen_can_move(queen_position,wanted_position,original_color){
+    let queen_movement={"can_move":false,"color_same":false,"is_queen":false,"difference":0};
+    queen_movement["difference"]=Math.abs(queen_position-wanted_position);
+    game.pieces[piece_finder(queen_position)].name==="queen" ? queen_movement["is_queen"]=true:{};
+    console.log("queen moves",same_column(queen_position,wanted_position),"b",same_row(queen_position,wanted_position),"c",queen_diagonal_movement(original_color,wanted_position,queen_movement["difference"]),"d",queen_movement["is_queen"],"e",rook_piece_validation(queen_position,wanted_position),"f",bishop_piece_validation(queen_position,wanted_position,queen_movement["difference"],original_color));
+    return (same_column(queen_position,wanted_position)==true || same_row(queen_position,wanted_position)==true || queen_diagonal_movement(original_color,wanted_position,queen_movement["difference"])) && queen_movement["is_queen"]==true && (rook_piece_validation(queen_position,wanted_position)==true || bishop_piece_validation(queen_position,wanted_position,queen_movement["difference"],original_color)) ? true : false;
+
+}
+
+function queen_diagonal_movement(original_color,wanted_position,difference){
+    let can_move=false;
+    let color_same=false;
+    original_color==find_square_color(wanted_position)? color_same=true:{};
+    difference>=7 && (difference%9==0 || difference%7==0)?can_move=true:{};
+    return can_move==true && color_same==true ? true:false;
+}
 function bishop_piece_validation(number1,number2,difference,original_color){
     //let difference=number1-number2;
     let divisible_by=difference%9==0 ? 9:7;
     let is_negative=parseInt(number1)-parseInt(number2)<0 ? true:false;
-    console.log(is_negative,"dfghjklkjhgfdsssssssssss");
+    
     number1=parseInt(number1);
     number2=parseInt(number2);
     let differences_array_9=[];
@@ -304,14 +340,31 @@ function bishop_piece_validation(number1,number2,difference,original_color){
         differences_array_7=findNumbersDivisibleBy(difference,7);
         
     }
-    
+    let number1_index=0;
+    let number2_index=0;
+    game.row_board.forEach((row)=>{
+        if(row.includes(number1)&&row.includes(number2)){
+            can_move=false;
+        }
+        if(row.includes(number1)){
+            number1_index=row.indexOf(number1);
+        }
+        if(row.includes(number2)){
+            number2_index=row.indexOf(number2);
+        }
+    })
+    if(number1_index==number2_index){
+        can_move=false;
+        differences_array_9=[];
+        differences_array_7=[];
+    }
     if(differences_array_9.length>=1){
         differences_array_9.forEach((number_difference)=>{
-            console.log(number_difference,"jlkjljlk");
+            
             
             if(is_negative==true){
                 if(original_color==find_square_color(number1+number_difference)){
-                    console.log(number1+number_difference,"addition");
+                    
                     if(hasPiece(number1+number_difference)){
                         can_move=false;
                     }
@@ -330,20 +383,21 @@ function bishop_piece_validation(number1,number2,difference,original_color){
         })
     }
     
-    console.log(differences_array_7,differences_array_9);
+    
     if(differences_array_7.length>=1){
         differences_array_7.forEach((number_difference)=>{
-            console.log(number_difference,"jlkjljlk");
+            
             if(is_negative==true){
                 if(original_color==find_square_color(number1+number_difference)){
-                    console.log(number1+number_difference,"addition");
+                    
                     if(hasPiece(number1+number_difference)){
                         can_move=false;
                     }
                 }
                 
             }else{
-                if(original_color==find_square_color(number1-number_difference)){
+                console.log("hello world",number1,number_difference,differences_array_7);
+                if(original_color==find_square_color(parseInt(number1)-number_difference)){
                     if(hasPiece(number1-number_difference)){
                         can_move=false;
                     }
@@ -353,7 +407,8 @@ function bishop_piece_validation(number1,number2,difference,original_color){
             
         })
     }
-    console.log(can_move,"has to give false");
+    
+    
     return can_move;
     
 }
@@ -367,8 +422,65 @@ function findNumbersDivisibleBy(n,divisible) {
     
     return array;
 }
+
+function king_can_move(king_positon,wanted_position,original_color){
+    let possible_differences=[1,7,8,9];
+    let difference=Math.abs(parseInt(king_positon)-parseInt(wanted_position));
+    console.log(difference,king_positon,wanted_position)
+    return possible_differences.includes(difference)? true:false;
+}
+
+function rook_piece_validation(number1,number2){
+    let smallest_position=number1<number2?number1:number2;
+    let biggest_position=number1>number2?number1:number2;
+    let can_move=true;
+    smallest_position=parseInt(smallest_position);
+    biggest_position=parseInt(biggest_position);
+    let is_vertical=false,is_horizontal=false;
+    game.row_board.forEach((row)=>{
+        
+        if(row.includes(smallest_position) && row.includes(biggest_position)){
+            is_horizontal=true;
+            
+        }else{
+            is_vertical=true;
+        }
+    })
+    //for the horizontal validation
+    if(is_horizontal){
+        let difference=biggest_position-smallest_position;
+        for(var i=1;i<difference;i++){
+            if(hasPiece(smallest_position+i)){
+                can_move=false;
+            }
+        }    
+    }
+    
+
+    //for the vertical validation
+    let current_row_index=0;
+    let possible_positios=[];
+    if(is_vertical){
+        game.row_board.forEach((row,index_of_row)=>{
+            if(row.includes(smallest_position)){
+                current_row_index=row.indexOf(smallest_position);
+            }
+            if(row.includes(smallest_position)==false && row[7]<biggest_position && row[0]>smallest_position){
+                possible_positios.push(row[current_row_index]);
+            }
+        });
+        possible_positios.forEach((position)=>{
+            if(hasPiece(position)){
+                can_move=false;
+            }
+        })
+
+    }
+    console.log("can move:",can_move,number1,number2,is_vertical,is_horizontal,possible_positios);
+    return can_move;
+}
 function remove_piece(item_class){
-    console.log(item_class);
+    
     const piece_div=document.querySelector(`.${item_class}`);
     piece_div.innerHTML="";
 }

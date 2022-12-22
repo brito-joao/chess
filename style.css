@@ -24,3 +24,16 @@ body{
     width: 12vw;
     max-height: 12vw;
 }
+.gameo{
+    font-size: 3em;
+    border: solid red;
+    border-radius: 2em;
+    margin:1em;
+    text-align: center;
+}
+.title{
+    color: white;
+    text-align: center;
+    margin-top: 1em;
+    font-size: 2em;
+}
