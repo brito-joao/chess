@@ -425,9 +425,11 @@ function findNumbersDivisibleBy(n,divisible) {
 
 function king_can_move(king_positon,wanted_position,original_color){
     let possible_differences=[1,7,8,9];
+    let is_king=false;
+    game.pieces[piece_finder(king_positon)].name==="king" ? is_king=true:{};
     let difference=Math.abs(parseInt(king_positon)-parseInt(wanted_position));
     console.log(difference,king_positon,wanted_position)
-    return possible_differences.includes(difference)? true:false;
+    return possible_differences.includes(difference) && is_king? true:false;
 }
 
 function rook_piece_validation(number1,number2){
