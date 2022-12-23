@@ -1,0 +1,1 @@
+same_column(rook_position,wanted_position) || same_row(rook_position,wanted_position)==true
