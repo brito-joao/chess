@@ -1,6 +1,6 @@
 const container=document.querySelector(".container");
-const body=document.querySelector("body");
-
+const title=document.querySelector(".title");
+const body=document.querySelector("body")
 //main game object 
 function Game(){
     this.board=[];
@@ -67,8 +67,8 @@ function game_over(game){
     })
     console.log("is game over?",counter);
     if(counter<2){
-        body.innerHTML+="<p class='gameo'>Game Over<p>";
-        body.style="background-color:white";
+        title.innerText="Game Over";
+        body.style="background-color:black";
     }
 }
 function mainFunction(square){
