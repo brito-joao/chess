@@ -2,6 +2,10 @@
     margin: 0;
     padding: 0;
 }
+* {
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+}
 body{
     background-color: rgb(34, 21, 3);
     display: flex;
@@ -9,6 +13,7 @@ body{
     flex-direction: column;
     
 }
+
 .container{
     width: 100vw;
     margin-top: 10vh;
@@ -18,6 +23,10 @@ body{
     border-top: solid 20px burlywood;
     border-bottom: solid 20px burlywood;
 
+}
+.sub-title{
+    color:white;
+    margin: 0.2em;
 }
 .square{
     width: 12.5vw;

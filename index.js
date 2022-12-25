@@ -108,7 +108,7 @@ function move_piece_to_empty_square(item_class,game){
 function piece_movement_validation(game,clicked_square,item_class){
     
     bishop_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
-    :pawn_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
+    :pawn_can_move(game.current_piece,clicked_square,game.current_piece_color,game)==true ? move_piece_to_empty_square(item_class,game)
     :knight_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
     :rook_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
     :queen_can_move(game.current_piece,clicked_square,game.current_piece_color)==true ? move_piece_to_empty_square(item_class,game)
@@ -193,10 +193,19 @@ function pawn_can_kill(pawn_position,victim_piece,game){
     let pawn_color=game.pieces[piece_finder(pawn_position)].color;
     difference=pawn_position-victim_piece;
     //find pawn color, then compare, if 9 or 7 squares away, then can eat
-
     game.pieces[piece_finder(pawn_position)].name==="pawn" ? is_pawn=true:{};
-    (pawn_color!=game.pieces[piece_finder(victim_piece)].color) ? color_same=true:{};
-    (Math.abs(difference)==9 || Math.abs(difference)==7)? can_kill=true:{};
+    if(difference>0 && pawn_color=="white"){
+        
+        (pawn_color!=game.pieces[piece_finder(victim_piece)].color) ? color_same=true:{};
+        (difference==9 || difference==7)? can_kill=true:{};
+    }
+    if(difference<0 && pawn_color=="black"){
+        
+        (pawn_color!=game.pieces[piece_finder(victim_piece)].color) ? color_same=true:{};
+        (difference==-9 || difference==-7)? can_kill=true:{};
+    }
+    
+    
         
         
         
@@ -206,37 +215,55 @@ function pawn_can_kill(pawn_position,victim_piece,game){
 }
 //validate the movement of pieces
 
-function pawn_can_move(pawn_position,wanted_position,original_color){
+function pawn_can_move(pawn_position,wanted_position,original_color, game){
     let difference;
     let is_first_move=false;
     let is_pawn=false;
     let can_move=false;
     
-
+    let pawn_color=game.pieces[piece_finder(pawn_position)].color;
     //verify if it is a pawn
     game.pieces[piece_finder(pawn_position)].name==="pawn"?is_pawn=true:{};
     //if it is the pawn's first move --------
     //change the var is_first_move to true and pawn atribute is_first_move to false
     
-    if(game.pieces[piece_finder(pawn_position)].is_first_move==true){is_first_move=true;game.pieces[piece_finder(pawn_position)].is_first_move=false;}
+    if(game.pieces[piece_finder(pawn_position)].is_first_move==true){
+        is_first_move=true;game.pieces[piece_finder(pawn_position)].is_first_move=false;
+    }
     
     
-
     //tomorrow: create a function for the difference for all the positions
-    difference=Math.abs(pawn_position-wanted_position);
-    
-    if((difference==8 && find_square_color(wanted_position)!=original_color && is_first_move==false)){
+    difference=pawn_position-wanted_position;
+    if(difference>0 && pawn_color=="white"){
+        if((difference==8 && find_square_color(wanted_position)!=original_color && is_first_move==false)){
+            
+            can_move=true;
+            
+        }
+
         
-        can_move=true;
-        
+        if((is_first_move==true && difference==16) || (is_first_move==true && difference==8)){
+            
+            can_move=true;
+            
+        }    
     }
 
-    
-    if((is_first_move==true && difference==16) || (is_first_move==true && difference==8)){
+    if(difference<0 && pawn_color=="black"){
+        if((difference==-8 && find_square_color(wanted_position)!=original_color && is_first_move==false)){
+            
+            can_move=true;
+            
+        }
+
         
-        can_move=true;
-        
+        if((is_first_move==true && difference==-16) || (is_first_move==true && difference==-8)){
+            
+            can_move=true;
+            
+        }    
     }
+    
     
     return is_pawn==true && can_move==true ? true:false;
 }
